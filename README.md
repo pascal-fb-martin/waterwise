@@ -6,6 +6,8 @@ A micro service to interface with the bewaterwise.com watering index RSS feed
 
 This project depends on [echttp](https://github.com/pascal-fb-martin/echttp) and [houseportal](https://github.com/pascal-fb-martin/houseportal). It accepts all standard options of echttp and the houseportal client runtime. See these two projects for more information.
 
+This project is also a good example of a minimal micro-service based on echttp and houseportal.
+
 ## Interface
 
 The waterwise service accepts the /waterwise/status HTTP URL and returns the watering index information in the JSON format, for example:

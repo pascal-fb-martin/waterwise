@@ -62,7 +62,7 @@ static const char *waterwise_status (const char *method, const char *uri,
     echttp_json_add_integer (context, top, "timestamp", (long)time(0));
     echttp_json_add_string (context, top, "host", host);
     int container = echttp_json_add_object (context, top, "status");
-    echttp_json_add_string (context, container, "name", "mwdsc");
+    echttp_json_add_string (context, container, "name", "waterwise");
     echttp_json_add_string (context, container, "origin", WaterWiseUrl);
     echttp_json_add_string (context, container, "state", WaterWiseState);
     if (WaterWiseError[0]) {

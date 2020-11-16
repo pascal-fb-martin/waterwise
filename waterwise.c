@@ -30,6 +30,7 @@
 #include "echttp_xml.h"
 #include "houseportalclient.h"
 
+static int    WaterWisePriority = 10;
 static int    WaterWiseIndex = 100;
 static char   WaterWiseState[2] = "u";
 static char   WaterWiseError[256] = "";
@@ -57,10 +58,11 @@ static const char *waterwise_status (const char *method, const char *uri,
     ParserContext context = echttp_json_start (token, 1024, pool, sizeof(pool));
 
     int root = echttp_json_add_object (context, 0, 0);
-    int top = echttp_json_add_object (context, root, "waterwise");
+    int top = echttp_json_add_object (context, root, "waterindex");
     echttp_json_add_integer (context, top, "timestamp", (long)time(0));
     echttp_json_add_string (context, top, "host", host);
     int container = echttp_json_add_object (context, top, "status");
+    echttp_json_add_string (context, container, "name", "mwdsc");
     echttp_json_add_string (context, container, "origin", WaterWiseUrl);
     echttp_json_add_string (context, container, "state", WaterWiseState);
     if (WaterWiseError[0]) {
@@ -68,7 +70,8 @@ static const char *waterwise_status (const char *method, const char *uri,
     } else {
        echttp_json_add_integer (context, container, "index", WaterWiseIndex);
        echttp_json_add_integer (context, container, "received", (long)WaterWiseReceived);
-       echttp_json_add_integer (context, container, "update", (long)WaterWiseUpdate);
+       echttp_json_add_integer (context, container, "updated", (long)WaterWiseUpdate);
+       echttp_json_add_integer (context, container, "priority", (long)WaterWisePriority);
     }
 
     const char *error = echttp_json_export (context, buffer, sizeof(buffer));
@@ -139,7 +142,7 @@ static void waterwise_background (int fd, int mode) {
     if (echttp_dynamic_port()) {
         if (WaterWiseReceived) houseportal_renew();
         else {
-            static const char *path[] = {"/waterwise"};
+            static const char *path[] = {"waterindex:/waterwise"};
             houseportal_register (echttp_port(4), path, 1);
         }
     }
@@ -164,6 +167,15 @@ int main (int argc, const char **argv) {
     //
     open ("/dev/null", O_RDONLY);
     dup(open ("/dev/null", O_WRONLY));
+
+    int i;
+    const char *priority;
+    for (i = 1; i < argc; ++i) {
+        if (echttp_option_match ("-priority=", argv[i], &priority)) {
+            WaterWisePriority = atoi(priority);
+            if (WaterWisePriority < 0) WaterWisePriority = 0;
+        }
+    }
 
     echttp_open (argc, argv);
     if (echttp_dynamic_port())

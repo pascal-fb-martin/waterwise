@@ -184,7 +184,7 @@ int main (int argc, const char **argv) {
     if (echttp_dynamic_port())
         houseportal_initialize (argc, argv);
     echttp_route_uri ("/waterwise/status", waterwise_status);
-    echttp_static_route ("/waterwise", "/usr/local/share/house/public/waterwise");
+    echttp_static_route ("/", "/usr/local/share/house/public");
     echttp_background (&waterwise_background);
     echttp_loop();
 }

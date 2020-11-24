@@ -60,6 +60,7 @@ static const char *waterwise_status (const char *method, const char *uri,
 
     int root = echttp_json_add_object (context, 0, 0);
     echttp_json_add_string (context, root, "host", host);
+    echttp_json_add_string (context, root, "proxy", houseportal_server());
     echttp_json_add_integer (context, root, "timestamp", (long)time(0));
     int top = echttp_json_add_object (context, root, "waterindex");
     int container = echttp_json_add_object (context, top, "status");

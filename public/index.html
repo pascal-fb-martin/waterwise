@@ -8,6 +8,8 @@ function indexUpdate (response) {
     document.getElementsByTagName('title')[0].innerHTML =
         response.host+' - Waterwise';
 
+    document.getElementById('portal').href = 'http://'+response.proxy+'/index.html';
+
     if (response.waterindex.status.received) {
         var now = Date(response.waterindex.status.received * 1000).toLocaleString();
         now = now.substr(0, now.indexOf(" GMT"));
@@ -47,6 +49,7 @@ window.onload = function() {
    <tr><td>
    <table class="housetop">
    <tr>
+   <td><a id="portal" href="/index.html">Portal</a></td>
    <td><span>Waterwise</span></td>
    </tr>
    </table> 

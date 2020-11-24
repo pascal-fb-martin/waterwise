@@ -18,7 +18,7 @@ PIDFILE=/var/run/waterwise.pid
 
 test -x $DAEMON || exit 0
 
-OPTS=-http-service=dynamic
+OPTS=
 
 if [ -r /etc/default/waterwise ]; then
 	. /etc/default/waterwise

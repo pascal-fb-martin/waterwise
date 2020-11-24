@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel=stylesheet type="text/css" href="/house.css" title="House">
+<script>
+function indexUpdate (response) {
+
+    document.getElementsByTagName('title')[0].innerHTML =
+        response.host+' - Waterwise';
+
+    if (response.waterindex.status.received) {
+        var now = Date(response.waterindex.status.received * 1000).toLocaleString();
+        now = now.substr(0, now.indexOf(" GMT"));
+
+        document.getElementById('indexvalue').innerHTML =
+            response.waterindex.status.index+'%';
+        document.getElementById('priority').innerHTML =
+            response.waterindex.status.priority;
+        document.getElementById('indexdate').innerHTML = now;
+    } else {
+        document.getElementById('indexvalue').innerHTML =
+            response.waterindex.status.error;
+    }
+}
+
+function indexInfo () {
+
+    var command = new XMLHttpRequest();
+    command.open("GET", "/waterwise/status");
+    command.onreadystatechange = function () {
+        if (command.readyState === 4 && command.status === 200) {
+            indexUpdate(JSON.parse(command.responseText));
+        }
+    }
+    command.send(null);
+}
+
+window.onload = function() {
+   indexInfo();
+   setInterval (indexInfo, 60000);
+}
+</script>
+<title></title>
+</head>
+<body>
+   <table class="housetopcontainer">
+   <tr><td>
+   <table class="housetop">
+   <tr>
+   <td><span>Waterwise</span></td>
+   </tr>
+   </table> 
+   </td></tr>
+   </table> 
+   <table class="housepanel">
+   <tr><td>
+   <div class="housepane">
+   <table class="housestatus">
+   <tr><td colspan="2"><span class="housetitle">Watering Index</span></td></tr>
+   <tr><td>Index:</td>
+   <td><span class="housedata" id="indexvalue"></span></td></tr>
+   <tr><td>Priority:</td>
+   <td><span class="housedata" id="priority"></span></td></tr>
+   <tr><td>Date:</td>
+   <td><span class="housedata" id="indexdate"></span></td></tr>
+   </table>
+   </div>
+   </td></tr>
+   </table> 
+</body>
+</html>
+

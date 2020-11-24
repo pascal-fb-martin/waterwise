@@ -26,6 +26,7 @@
 #include <time.h>
 
 #include "echttp.h"
+#include "echttp_static.h"
 #include "echttp_json.h"
 #include "echttp_xml.h"
 #include "houseportalclient.h"
@@ -177,10 +178,13 @@ int main (int argc, const char **argv) {
         }
     }
 
+    echttp_default ("-http-service=dynamic");
+
     echttp_open (argc, argv);
     if (echttp_dynamic_port())
         houseportal_initialize (argc, argv);
     echttp_route_uri ("/waterwise/status", waterwise_status);
+    echttp_static_route ("/waterwise", "/usr/local/share/house/public/waterwise");
     echttp_background (&waterwise_background);
     echttp_loop();
 }

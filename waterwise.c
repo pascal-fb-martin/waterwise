@@ -91,6 +91,12 @@ static void waterwise_response
     ParserToken tokens[100];
     int  count = 100;
 
+    status = echttp_redirected("GET");
+    if (!status) {
+        echttp_submit (0, 0, waterwise_response, (void *)0);
+        return;
+    }
+
     WaterWiseState[0] = 'e'; // Assume error.
     if (status != 200) {
         snprintf (WaterWiseError, sizeof(WaterWiseError),

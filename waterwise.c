@@ -143,7 +143,11 @@ static void waterwise_response
 
 static void waterwise_background (int fd, int mode) {
 
+    static time_t LastCall = 0;
     time_t now = time(0);
+
+    if (now == LastCall) return;
+    LastCall = now;
 
     if (now % 60) return; // Check every minute only.
 

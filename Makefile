@@ -17,7 +17,7 @@ rebuild: clean all
 	gcc -c -g -O -o $@ $<
 
 waterwise: $(OBJS)
-	gcc -g -O -o waterwise $(OBJS) -lhouseportal -lechttp -lcrypto -lrt
+	gcc -g -O -o waterwise $(OBJS) -lhouseportal -lechttp -lssl -lcrypto -lrt
 
 install:
 	if [ -e /etc/init.d/waterwise ] ; then systemctl stop waterwise ; fi

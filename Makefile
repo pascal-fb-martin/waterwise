@@ -47,3 +47,17 @@ uninstall:
 purge: uninstall
 	rm -rf /etc/default/waterwise
 
+docker: all
+	rm -rf build
+	mkdir -p build
+	cp Dockerfile build
+	mkdir -p build/usr/local/bin
+	cp waterwise build/usr/local/bin
+	chmod 755 build/usr/local/bin/waterwise
+	mkdir -p build/usr/local/share/house/public/waterwise
+	cp public/* build/usr/local/share/house/public/waterwise
+	chmod 644 build/usr/local/share/house/public/waterwise/*
+	cp /usr/local/share/house/public/house.css build/usr/local/share/house/public
+	chmod 644 build/usr/local/share/house/public/house.css
+	cd build ; docker build -t waterwise .
+	rm -rf build

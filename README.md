@@ -31,3 +31,7 @@ The timestamp field represents the time of the request, the host field represent
 The origin field represent the URL used to obtain the index. The state field is either 'u' (not yet initialized), 'f' (failed to access the bewaterwise.com web site), 'e' (malformed JSON data received) or 'a' (active). Except when active, an error field provides a description of the error.
 
 The index field is a percentage (which can be above 100), the received field indicate when this index was obtained, and the calculated field indicates when the bewaterwise.com site calculated the index. (This service use the weekly index.)
+
+## Docker
+
+The project supports a Docker container build, which was tested on an ARM board running Debian. To make it work, all the house containers should be run in host network mode (`--network` host option). This is because of the way [houseportal](https://github.com/pascal-fb-martin/houseportal) manages access to each service: using dynamically assigned ports does not mesh well with Docker's port mapping.

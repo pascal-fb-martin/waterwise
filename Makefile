@@ -20,15 +20,17 @@ waterwise: $(OBJS)
 	gcc -g -O -o waterwise $(OBJS) -lhouseportal -lechttp -lssl -lcrypto -lrt
 
 install:
-	if [ -e /etc/init.d/waterwise ] ; then systemctl stop waterwise ; fi
+	if [ -e /etc/init.d/waterwise ] ; then systemctl stop waterwise ; systemctl disable waterwise ; rm -f /etc/init.d/waterwise ; fi
+	if [ -e /lib/systemd/system/waterwise.service ] ; then systemctl stop waterwise ; systemctl disable waterwise ; rm -f /lib/systemd/system/waterwise.service ; fi
 	mkdir -p /usr/local/bin
 	mkdir -p /var/lib/house
 	mkdir -p /etc/house
-	rm -f /usr/local/bin/waterwise /etc/init.d/waterwise
+	rm -f /usr/local/bin/waterwise
 	cp waterwise /usr/local/bin
-	cp init.debian /etc/init.d/waterwise
-	chown root:root /usr/local/bin/waterwise /etc/init.d/waterwise
-	chmod 755 /usr/local/bin/waterwise /etc/init.d/waterwise
+	chown root:root /usr/local/bin/waterwise
+	chmod 755 /usr/local/bin/waterwise
+	cp systemd.service /lib/systemd/system/waterwise.service
+	chown root:root /lib/systemd/system/waterwise.service
 	mkdir -p $(SHARE)/public/waterwise
 	cp public/* $(SHARE)/public/waterwise
 	chmod 644 $(SHARE)/public/waterwise/*
@@ -41,7 +43,8 @@ install:
 uninstall:
 	systemctl stop waterwise
 	systemctl disable waterwise
-	rm -f /usr/local/bin/waterwise /etc/init.d/waterwise
+	rm -f /usr/local/bin/waterwise
+	rm -f /lib/systemd/system/waterwise.service /etc/init.d/waterwise
 	systemctl daemon-reload
 
 purge: uninstall

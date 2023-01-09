@@ -1,0 +1,13 @@
+[Unit]
+Description=the BeWaterWise watering index interface
+After=network-online.target houseportal.service
+
+[Service]
+Environment="OPTS="
+EnvironmentFile=-/etc/default/waterwise
+EnvironmentFile=-/etc/sysconfig/waterwise
+ExecStart=/usr/local/bin/waterwise $OPTS
+
+[Install]
+WantedBy=multi-user.target
+

@@ -43,6 +43,7 @@ install:
 uninstall:
 	systemctl stop waterwise
 	systemctl disable waterwise
+	rm -rf $(SHARE)/public/waterwise
 	rm -f /usr/local/bin/waterwise
 	rm -f /lib/systemd/system/waterwise.service /etc/init.d/waterwise
 	systemctl daemon-reload

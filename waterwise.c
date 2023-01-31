@@ -70,14 +70,6 @@ static void waterwise_select_index (const char *value) {
     }
 }
 
-static const char *waterwise_set (const char *method, const char *uri,
-                                  const char *data, int length) {
-    const char *value = echttp_parameter_get("index");
-    if (value) {
-        waterwise_select_index (value);
-    }
-}
-
 static const char *waterwise_status (const char *method, const char *uri,
                                      const char *data, int length) {
     static char buffer[65537];
@@ -117,6 +109,15 @@ static const char *waterwise_status (const char *method, const char *uri,
     }
     echttp_content_type_json ();
     return buffer;
+}
+
+static const char *waterwise_set (const char *method, const char *uri,
+                                  const char *data, int length) {
+    const char *value = echttp_parameter_get("index");
+    if (value) {
+        waterwise_select_index (value);
+    }
+    return waterwise_status (method, uri, data, length);
 }
 
 static void waterwise_response

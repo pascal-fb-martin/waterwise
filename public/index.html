@@ -27,10 +27,10 @@ function indexUpdate (response) {
     }
 }
 
-function indexInfo () {
+function indexGet (url) {
 
     var command = new XMLHttpRequest();
-    command.open("GET", "/waterwise/status");
+    command.open("GET", url);
     command.onreadystatechange = function () {
         if (command.readyState === 4 && command.status === 200) {
             indexUpdate(JSON.parse(command.responseText));
@@ -38,15 +38,10 @@ function indexInfo () {
     }
     command.send(null);
 }
-
-function selectIndex (name) {
-    var command = new XMLHttpRequest();
-    command.open("GET", "/waterwise/set?index="+name);
-    command.send(null);
-}
-function selectDaily () {selectIndex("daily");}
-function selectWeekly () {selectIndex("weekly");}
-function selectMonthly () {selectIndex("monthly");}
+function indexInfo () {indexGet ("/waterwise/status");}
+function selectDaily () {indexGet("/waterwise/set?index=daily");}
+function selectWeekly () {indexGet("/waterwise/set?index=weekly");}
+function selectMonthly () {indexGet("/waterwise/set?index=monthly");}
 
 window.onload = function() {
    indexInfo();

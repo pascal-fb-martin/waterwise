@@ -14,6 +14,8 @@ function indexUpdate (response) {
         var now = Date(response.waterindex.status.received * 1000).toLocaleString();
         now = now.substr(0, now.indexOf(" GMT"));
 
+        document.getElementById('indextype').innerHTML =
+            response.waterindex.status.type;
         document.getElementById('indexvalue').innerHTML =
             response.waterindex.status.index+'%';
         document.getElementById('priority').innerHTML =
@@ -36,6 +38,15 @@ function indexInfo () {
     }
     command.send(null);
 }
+
+function selectIndex (name) {
+    var command = new XMLHttpRequest();
+    command.open("GET", "/waterwise/set?index="+name);
+    command.send(null);
+}
+function selectDaily () {selectIndex("daily");}
+function selectWeekly () {selectIndex("weekly");}
+function selectMonthly () {selectIndex("monthly");}
 
 window.onload = function() {
    indexInfo();
@@ -60,6 +71,8 @@ window.onload = function() {
    <div class="housepane">
    <table class="housestatus">
    <tr><td colspan="2"><span class="housetitle">Watering Index</span></td></tr>
+   <tr><td>Type:</td>
+   <td><span class="housedata" id="indextype"></span></td></tr>
    <tr><td>Index:</td>
    <td><span class="housedata" id="indexvalue"></span></td></tr>
    <tr><td>Priority:</td>
@@ -70,6 +83,11 @@ window.onload = function() {
    </div>
    </td></tr>
    </table> 
+   <table class="housepanelbuttongroup">
+   <tr><td><button class="housepanelbutton" onclick="selectDaily()">Use Daily Index</button></td></tr>
+   <tr><td><button class="housepanelbutton" onclick="selectWeekly()">Use Weekly Index</button></td></tr>
+   <tr><td><button class="housepanelbutton" onclick="selectMonthly()">Use Monthly Index</button></td></tr>
+   </table>
 </body>
 </html>
 

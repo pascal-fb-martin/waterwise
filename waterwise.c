@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <time.h>
 
 #include "echttp.h"
@@ -31,8 +32,11 @@
 #include "echttp_xml.h"
 #include "houseportalclient.h"
 
+static int    WaterWiseIndexDaily = 100;
+static int    WaterWiseIndexWeekly = 100;
+static int    WaterWiseIndexMonthly = 100;
+
 static int    WaterWisePriority = 10;
-static int    WaterWiseIndex = 100;
 static char   WaterWiseState[2] = "u";
 static char   WaterWiseError[256] = "";
 static time_t WaterWiseUpdate = 0;
@@ -40,10 +44,39 @@ static time_t WaterWiseReceived = 0;
 
 static const char *WaterWiseUrl = "http://www.bewaterwise.com/RSS/rsswi.xml";
 
-static const char *WaterWiseIndexPath = 
+static const char WaterWiseDailyIndexPath[] =
+    ".rss.content.channel.content.item[0].content.description.content";
+static const char WaterWiseWeeklyIndexPath[] =
     ".rss.content.channel.content.item[1].content.description.content";
+static const char WaterWiseMonthlyIndexPath[] =
+    ".rss.content.channel.content.item[2].content.description.content";
+
 static const char *WaterWiseUpdatePath = 
     ".rss.content.channel.content.dateupdated.content";
+
+static const char *WaterWiseIndexType = "Weekly";
+static int   *WaterWiseIndex = &WaterWiseIndexWeekly;
+
+static void waterwise_select_index (const char *value) {
+    if (!strcasecmp ("daily", value)) {
+        WaterWiseIndexType = "Daily";
+        WaterWiseIndex = &WaterWiseIndexDaily;
+    } else if (!strcasecmp ("weekly", value)) {
+        WaterWiseIndexType = "Weekly";
+        WaterWiseIndex = &WaterWiseIndexWeekly;
+    } else if (!strcasecmp ("monthly", value)) {
+        WaterWiseIndexType = "Monthly";
+        WaterWiseIndex = &WaterWiseIndexMonthly;
+    }
+}
+
+static const char *waterwise_set (const char *method, const char *uri,
+                                  const char *data, int length) {
+    const char *value = echttp_parameter_get("index");
+    if (value) {
+        waterwise_select_index (value);
+    }
+}
 
 static const char *waterwise_status (const char *method, const char *uri,
                                      const char *data, int length) {
@@ -65,12 +98,13 @@ static const char *waterwise_status (const char *method, const char *uri,
     int top = echttp_json_add_object (context, root, "waterindex");
     int container = echttp_json_add_object (context, top, "status");
     echttp_json_add_string (context, container, "name", "waterwise");
+    echttp_json_add_string (context, container, "type", WaterWiseIndexType);
     echttp_json_add_string (context, container, "origin", WaterWiseUrl);
     echttp_json_add_string (context, container, "state", WaterWiseState);
     if (WaterWiseError[0]) {
         echttp_json_add_string (context, container, "error", WaterWiseError);
     } else {
-       echttp_json_add_integer (context, container, "index", WaterWiseIndex);
+       echttp_json_add_integer (context, container, "index", *WaterWiseIndex);
        echttp_json_add_integer (context, container, "received", (long)WaterWiseReceived);
        echttp_json_add_integer (context, container, "updated", (long)WaterWiseUpdate);
        echttp_json_add_integer (context, container, "priority", (long)WaterWisePriority);
@@ -115,14 +149,29 @@ static void waterwise_response
         return;
     }
 
-    int index = echttp_json_search (tokens, WaterWiseIndexPath);
+    int index = echttp_json_search (tokens, WaterWiseDailyIndexPath);
     if (index <= 0) {
-        snprintf (WaterWiseError, sizeof(WaterWiseError), "no index found");
+        snprintf (WaterWiseError, sizeof(WaterWiseError), "no daily index found");
         return;
     }
+    WaterWiseIndexDaily = atoi(tokens[index].value.string);
+
+    index = echttp_json_search (tokens, WaterWiseWeeklyIndexPath);
+    if (index <= 0) {
+        snprintf (WaterWiseError, sizeof(WaterWiseError), "no weekly index found");
+        return;
+    }
+    WaterWiseIndexWeekly = atoi(tokens[index].value.string);
+
+    index = echttp_json_search (tokens, WaterWiseMonthlyIndexPath);
+    if (index <= 0) {
+        snprintf (WaterWiseError, sizeof(WaterWiseError), "no monthly index found");
+        return;
+    }
+    WaterWiseIndexMonthly = atoi(tokens[index].value.string);
+
     WaterWiseState[0] = 'a'; // No error found.
     WaterWiseError[0] = 0;
-    WaterWiseIndex = atoi(tokens[index].value.string);
     WaterWiseReceived = time(0);
 
     index = echttp_json_search (tokens, WaterWiseUpdatePath);
@@ -181,11 +230,13 @@ int main (int argc, const char **argv) {
     dup(open ("/dev/null", O_WRONLY));
 
     int i;
-    const char *priority;
+    const char *value;
     for (i = 1; i < argc; ++i) {
-        if (echttp_option_match ("-priority=", argv[i], &priority)) {
-            WaterWisePriority = atoi(priority);
+        if (echttp_option_match ("-priority=", argv[i], &value)) {
+            WaterWisePriority = atoi(value);
             if (WaterWisePriority < 0) WaterWisePriority = 0;
+        } else if (echttp_option_match ("-index=", argv[i], &value)) {
+            waterwise_select_index (value);
         }
     }
 
@@ -194,6 +245,7 @@ int main (int argc, const char **argv) {
     argc = echttp_open (argc, argv);
     if (echttp_dynamic_port())
         houseportal_initialize (argc, argv);
+    echttp_route_uri ("/waterwise/set", waterwise_set);
     echttp_route_uri ("/waterwise/status", waterwise_status);
     echttp_static_route ("/", "/usr/local/share/house/public");
     echttp_background (&waterwise_background);

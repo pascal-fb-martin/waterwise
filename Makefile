@@ -19,9 +19,11 @@ rebuild: clean all
 waterwise: $(OBJS)
 	gcc -Os -o waterwise $(OBJS) -lhouseportal -lechttp -lssl -lcrypto -lrt
 
-install:
-	if [ -e /etc/init.d/waterwise ] ; then systemctl stop waterwise ; systemctl disable waterwise ; rm -f /etc/init.d/waterwise ; fi
-	if [ -e /lib/systemd/system/waterwise.service ] ; then systemctl stop waterwise ; systemctl disable waterwise ; rm -f /lib/systemd/system/waterwise.service ; fi
+dev:
+
+# Distribution agnostic file installation -----------------------
+
+install-files:
 	mkdir -p /usr/local/bin
 	mkdir -p /var/lib/house
 	mkdir -p /etc/house
@@ -29,27 +31,59 @@ install:
 	cp waterwise /usr/local/bin
 	chown root:root /usr/local/bin/waterwise
 	chmod 755 /usr/local/bin/waterwise
-	cp systemd.service /lib/systemd/system/waterwise.service
-	chown root:root /lib/systemd/system/waterwise.service
 	mkdir -p $(SHARE)/public/waterwise
 	cp public/* $(SHARE)/public/waterwise
 	chmod 644 $(SHARE)/public/waterwise/*
 	chmod 755 $(SHARE) $(SHARE)/public $(SHARE)/public/waterwise
 	touch /etc/default/waterwise
+
+uninstall-files:
+	rm -rf $(SHARE)/public/waterwise
+	rm -f /usr/local/bin/waterwise
+
+purge-config:
+	rm -rf /etc/default/waterwise
+
+# Distribution agnostic systemd support -------------------------
+
+install-systemd:
+	cp systemd.service /lib/systemd/system/waterwise.service
+	chown root:root /lib/systemd/system/waterwise.service
 	systemctl daemon-reload
 	systemctl enable waterwise
 	systemctl start waterwise
 
-uninstall:
-	systemctl stop waterwise
-	systemctl disable waterwise
-	rm -rf $(SHARE)/public/waterwise
-	rm -f /usr/local/bin/waterwise
-	rm -f /lib/systemd/system/waterwise.service /etc/init.d/waterwise
-	systemctl daemon-reload
+uninstall-systemd:
+	if [ -e /etc/init.d/waterwise ] ; then systemctl stop waterwise ; systemctl disable waterwise ; rm -f /etc/init.d/waterwise ; fi
+	if [ -e /lib/systemd/system/waterwise.service ] ; then systemctl stop waterwise ; systemctl disable waterwise ; rm -f /lib/systemd/system/waterwise.service ; systemctl daemon-reload ; fi
 
-purge: uninstall
-	rm -rf /etc/default/waterwise
+stop-systemd: uninstall-systemd
+
+# Debian GNU/Linux install --------------------------------------
+
+install-debian: stop-systemd install-files install-systemd
+
+uninstall-debian: uninstall-systemd uninstall-files
+
+purge-debian: uninstall-debian purge-config
+
+# Void Linux install --------------------------------------------
+
+install-void: install-files
+
+uninstall-void: uninstall-files
+
+purge-void: uninstall-void purge-config
+
+# Default install (Debian GNU/Linux) ----------------------------
+
+install: install-debian
+
+uninstall: uninstall-debian
+
+purge: purge-debian
+
+# Docker install ------------------------------------------------
 
 docker: all
 	rm -rf build

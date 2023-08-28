@@ -1,8 +1,30 @@
+# waterwise - A simple home web service to get the bewaterwise.com index.
+#
+# Copyright 2023, Pascal Martin
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor,
+# Boston, MA  02110-1301, USA.
+
+HAPP=waterwise
+HROOT=/usr/local
+SHARE=$(HROOT)/share/house
+
+# Application build. --------------------------------------------
 
 OBJS=waterwise.o
 LIBOJS=
-
-SHARE=/usr/local/share/house
 
 all: waterwise
 
@@ -19,49 +41,48 @@ rebuild: clean all
 waterwise: $(OBJS)
 	gcc -Os -o waterwise $(OBJS) -lhouseportal -lechttp -lssl -lcrypto -lrt
 
-install:
-	if [ -e /etc/init.d/waterwise ] ; then systemctl stop waterwise ; systemctl disable waterwise ; rm -f /etc/init.d/waterwise ; fi
-	if [ -e /lib/systemd/system/waterwise.service ] ; then systemctl stop waterwise ; systemctl disable waterwise ; rm -f /lib/systemd/system/waterwise.service ; fi
-	mkdir -p /usr/local/bin
+# Application files installation --------------------------------
+
+install-app:
+	mkdir -p $(HROOT)/bin
 	mkdir -p /var/lib/house
 	mkdir -p /etc/house
-	rm -f /usr/local/bin/waterwise
-	cp waterwise /usr/local/bin
-	chown root:root /usr/local/bin/waterwise
-	chmod 755 /usr/local/bin/waterwise
-	cp systemd.service /lib/systemd/system/waterwise.service
-	chown root:root /lib/systemd/system/waterwise.service
+	rm -f $(HROOT)/bin/waterwise
+	cp waterwise $(HROOT)/bin
+	chown root:root $(HROOT)/bin/waterwise
+	chmod 755 $(HROOT)/bin/waterwise
 	mkdir -p $(SHARE)/public/waterwise
 	cp public/* $(SHARE)/public/waterwise
 	chmod 644 $(SHARE)/public/waterwise/*
 	chmod 755 $(SHARE) $(SHARE)/public $(SHARE)/public/waterwise
 	touch /etc/default/waterwise
-	systemctl daemon-reload
-	systemctl enable waterwise
-	systemctl start waterwise
 
-uninstall:
-	systemctl stop waterwise
-	systemctl disable waterwise
+uninstall-app:
 	rm -rf $(SHARE)/public/waterwise
-	rm -f /usr/local/bin/waterwise
-	rm -f /lib/systemd/system/waterwise.service /etc/init.d/waterwise
-	systemctl daemon-reload
+	rm -f $(HROOT)/bin/waterwise
 
-purge: uninstall
+purge-app:
+
+purge-config:
 	rm -rf /etc/default/waterwise
+
+# System installation. ------------------------------------------
+
+include $(SHARE)/install.mak
+
+# Docker installation -------------------------------------------
 
 docker: all
 	rm -rf build
 	mkdir -p build
 	cp Dockerfile build
-	mkdir -p build/usr/local/bin
-	cp waterwise build/usr/local/bin
-	chmod 755 build/usr/local/bin/waterwise
-	mkdir -p build/usr/local/share/house/public/waterwise
-	cp public/* build/usr/local/share/house/public/waterwise
-	chmod 644 build/usr/local/share/house/public/waterwise/*
-	cp /usr/local/share/house/public/house.css build/usr/local/share/house/public
-	chmod 644 build/usr/local/share/house/public/house.css
+	mkdir -p build$(HROOT)/bin
+	cp waterwise build$(HROOT)/bin
+	chmod 755 build$(HROOT)/bin/waterwise
+	mkdir -p build$(HROOT)/share/house/public/waterwise
+	cp public/* build$(HROOT)/share/house/public/waterwise
+	chmod 644 build$(HROOT)/share/house/public/waterwise/*
+	cp $(SHARE)/public/house.css build$(SHARE)/public
+	chmod 644 build$(SHARE)/public/house.css
 	cd build ; docker build -t waterwise .
 	rm -rf build

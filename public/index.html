@@ -10,12 +10,13 @@ function indexUpdate (response) {
 
     document.getElementById('portal').href = 'http://'+response.proxy+'/index.html';
 
+    document.getElementById('indextype').innerHTML =
+        response.waterindex.status.type;
+
     if (response.waterindex.status.received) {
         var now = Date(response.waterindex.status.received * 1000).toLocaleString();
         now = now.substr(0, now.indexOf(" GMT"));
 
-        document.getElementById('indextype').innerHTML =
-            response.waterindex.status.type;
         document.getElementById('indexvalue').innerHTML =
             response.waterindex.status.index+'%';
         document.getElementById('priority').innerHTML =

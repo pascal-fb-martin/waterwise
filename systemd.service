@@ -1,8 +1,12 @@
 [Unit]
 Description=the BeWaterWise watering index interface
 After=network-online.target houseportal.service
+StartLimitIntervalSec=500
+StartLimitBurst=5
 
 [Service]
+Restart=on-failure
+RestartSec=50s
 Environment="OPTS="
 EnvironmentFile=-/etc/default/waterwise
 EnvironmentFile=-/etc/sysconfig/waterwise

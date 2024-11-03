@@ -32,6 +32,9 @@
 #include "echttp_xml.h"
 #include "houseportalclient.h"
 
+#include "housediscover.h"
+#include "houselog.h"
+
 static int    WaterWiseIndexDaily = 100;
 static int    WaterWiseIndexWeekly = 100;
 static int    WaterWiseIndexMonthly = 100;
@@ -136,6 +139,8 @@ static void waterwise_response
     if (status != 200) {
         snprintf (WaterWiseError, sizeof(WaterWiseError),
                   "HTTP code %d on %s", status, WaterWiseUrl);
+        houselog_trace (HOUSE_FAILURE, "HTTP",
+                        "ERROR %d on %s", status, WaterWiseUrl);
         return;
     }
 
@@ -143,16 +148,19 @@ static void waterwise_response
     if (error) {
         snprintf (WaterWiseError, sizeof(WaterWiseError),
                   "XML syntax error %s", error);
+        houselog_trace (HOUSE_FAILURE, "XML", "SYNTAX ERROR %s", error);
         return;
     }
     if (count <= 0) {
         snprintf (WaterWiseError, sizeof(WaterWiseError), "no XML data");
+        houselog_trace (HOUSE_FAILURE, "XML", "NO DATA");
         return;
     }
 
     int index = echttp_json_search (tokens, WaterWiseDailyIndexPath);
     if (index <= 0) {
         snprintf (WaterWiseError, sizeof(WaterWiseError), "no daily index found");
+        houselog_trace (HOUSE_FAILURE, "JSON", "NO DAILY INDEX FOUND");
         return;
     }
     WaterWiseIndexDaily = atoi(tokens[index].value.string);
@@ -160,6 +168,7 @@ static void waterwise_response
     index = echttp_json_search (tokens, WaterWiseWeeklyIndexPath);
     if (index <= 0) {
         snprintf (WaterWiseError, sizeof(WaterWiseError), "no weekly index found");
+        houselog_trace (HOUSE_FAILURE, "JSON", "NO WEEKLY INDEX FOUND");
         return;
     }
     WaterWiseIndexWeekly = atoi(tokens[index].value.string);
@@ -167,6 +176,7 @@ static void waterwise_response
     index = echttp_json_search (tokens, WaterWiseMonthlyIndexPath);
     if (index <= 0) {
         snprintf (WaterWiseError, sizeof(WaterWiseError), "no monthly index found");
+        houselog_trace (HOUSE_FAILURE, "JSON", "NO MONTHLY INDEX FOUND");
         return;
     }
     WaterWiseIndexMonthly = atoi(tokens[index].value.string);
@@ -189,6 +199,9 @@ static void waterwise_response
         WaterWiseUpdate = mktime (&update);
         if (WaterWiseUpdate < 0) WaterWiseUpdate = 0;
     }
+    houselog_event ("WATERWISE", "INDEX", "NEW",
+                    "INDEX %d%% (DAILY) %d%% (WEEKLY) %d%% (MONTHLY)",
+                    WaterWiseIndexDaily, WaterWiseIndexWeekly, WaterWiseIndexMonthly);
 }
 
 static void waterwise_background (int fd, int mode) {
@@ -199,15 +212,24 @@ static void waterwise_background (int fd, int mode) {
     if (now == LastCall) return;
     LastCall = now;
 
-    if (now % 60) return; // Check every minute only.
-
     if (echttp_dynamic_port()) {
-        if (WaterWiseReceived) houseportal_renew();
-        else {
+        static time_t Renewed = 0;
+        if (Renewed) {
+            if (now > Renewed + 60) {
+                houseportal_renew();
+                Renewed = now;
+            }
+        } else if (now % 5 == 0) {
             static const char *path[] = {"waterindex:/waterwise"};
             houseportal_register (echttp_port(4), path, 1);
+            Renewed = now;
         }
     }
+
+    housediscover (now);
+    houselog_background (now);
+
+    if (now % 60) return; // Check every minute only.
 
     if (now < WaterWiseReceived + 12 * 3600) return; // Ask twice a day.
 
@@ -246,6 +268,10 @@ int main (int argc, const char **argv) {
     argc = echttp_open (argc, argv);
     if (echttp_dynamic_port())
         houseportal_initialize (argc, argv);
+
+    housediscover_initialize (argc, argv);
+    houselog_initialize ("waterwise", argc, argv);
+
     echttp_route_uri ("/waterwise/set", waterwise_set);
     echttp_route_uri ("/waterwise/status", waterwise_status);
     echttp_static_route ("/", "/usr/local/share/house/public");

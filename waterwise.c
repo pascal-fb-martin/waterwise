@@ -192,7 +192,7 @@ static void waterwise_response
     } else {
         struct tm update;
         const char *date = tokens[index].value.string;
-        update.tm_mon = atoi(date);
+        update.tm_mon = atoi(date) - 1;
         update.tm_mday = atoi (strchr(date, '/')+1);
         update.tm_year = atoi (strrchr(date, '/')+1) - 1900;
         update.tm_hour = update.tm_min = update.tm_sec = 0;

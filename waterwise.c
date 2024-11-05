@@ -34,6 +34,7 @@
 
 #include "housediscover.h"
 #include "houselog.h"
+#include "houselog_sensor.h"
 
 static int    WaterWiseIndexDaily = 100;
 static int    WaterWiseIndexWeekly = 100;
@@ -202,6 +203,17 @@ static void waterwise_response
     houselog_event ("WATERWISE", "INDEX", "NEW",
                     "INDEX %d%% (DAILY) %d%% (WEEKLY) %d%% (MONTHLY)",
                     WaterWiseIndexDaily, WaterWiseIndexWeekly, WaterWiseIndexMonthly);
+
+    struct timeval timestamp;
+    timestamp.tv_sec = WaterWiseUpdate;
+    timestamp.tv_usec = 0;
+
+    houselog_sensor_numeric
+        (&timestamp, "Riverside", "index.daily", WaterWiseIndexDaily, "%");
+    houselog_sensor_numeric
+        (&timestamp, "Riverside", "index.weekly", WaterWiseIndexWeekly, "%");
+    houselog_sensor_numeric
+        (&timestamp, "Riverside", "index.monthly", WaterWiseIndexMonthly, "%");
 }
 
 static void waterwise_background (int fd, int mode) {
@@ -228,6 +240,7 @@ static void waterwise_background (int fd, int mode) {
 
     housediscover (now);
     houselog_background (now);
+    houselog_sensor_background (now);
 
     if (now % 60) return; // Check every minute only.
 
@@ -271,6 +284,7 @@ int main (int argc, const char **argv) {
 
     housediscover_initialize (argc, argv);
     houselog_initialize ("waterwise", argc, argv);
+    houselog_sensor_initialize ("waterwise", argc, argv);
 
     echttp_route_uri ("/waterwise/set", waterwise_set);
     echttp_route_uri ("/waterwise/status", waterwise_status);

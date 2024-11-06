@@ -158,6 +158,11 @@ static void waterwise_response
         return;
     }
 
+    int olddaily = WaterWiseIndexDaily;
+    int oldweekly = WaterWiseIndexWeekly;
+    int oldmonthly = WaterWiseIndexMonthly;
+    time_t oldupdate = WaterWiseUpdate;
+
     int index = echttp_json_search (tokens, WaterWiseDailyIndexPath);
     if (index <= 0) {
         snprintf (WaterWiseError, sizeof(WaterWiseError), "no daily index found");
@@ -201,6 +206,12 @@ static void waterwise_response
         if (WaterWiseUpdate < 0) WaterWiseUpdate = 0;
         else WaterWiseUpdate += (24 * 3600); // Calculated the day after.
     }
+
+    if ((olddaily == WaterWiseIndexDaily) &&
+        (oldweekly == WaterWiseIndexWeekly) &&
+        (oldmonthly == WaterWiseIndexMonthly) &&
+        (oldupdate == WaterWiseUpdate)) return; // No change.
+
     houselog_event ("WATERWISE", "INDEX", "NEW",
                     "INDEX %d%% (DAILY) %d%% (WEEKLY) %d%% (MONTHLY)",
                     WaterWiseIndexDaily, WaterWiseIndexWeekly, WaterWiseIndexMonthly);

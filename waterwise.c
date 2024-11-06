@@ -199,6 +199,7 @@ static void waterwise_response
         update.tm_isdst = -1;
         WaterWiseUpdate = mktime (&update);
         if (WaterWiseUpdate < 0) WaterWiseUpdate = 0;
+        else WaterWiseUpdate += (24 * 3600); // Calculated the day after.
     }
     houselog_event ("WATERWISE", "INDEX", "NEW",
                     "INDEX %d%% (DAILY) %d%% (WEEKLY) %d%% (MONTHLY)",

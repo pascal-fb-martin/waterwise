@@ -226,6 +226,7 @@ static void waterwise_response
         (&timestamp, "Riverside", "index.weekly", WaterWiseIndexWeekly, "%");
     houselog_sensor_numeric
         (&timestamp, "Riverside", "index.monthly", WaterWiseIndexMonthly, "%");
+    houselog_sensor_flush ();
 }
 
 static void waterwise_background (int fd, int mode) {

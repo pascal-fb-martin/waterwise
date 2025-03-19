@@ -10,12 +10,12 @@ This project is also a good example of a minimal micro-service based on echttp a
 
 ## Interface
 
-The waterwise service accepts the /waterwise/status HTTP URL and returns the watering index information in the JSON format, for example:
+The waterwise service accepts the /waterwise/status HTTP URL and returns the watering index information in JSON format, for example:
 ```
 {
-  "waterwise": {
-    "timestamp": 1602561976,
-    "host": "andresy",
+  "host": "andresy",
+  "timestamp": 1602561976,
+  "waterindex": {
     "status": {
       "origin": "http://www.bewaterwise.com/RSS/rsswi.xml",
       "state": "a",

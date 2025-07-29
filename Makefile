@@ -22,11 +22,11 @@
 # This Makefile depends on echttp and houseportal (dev) being installed.
 
 prefix=/usr/local
-
-HAPP=waterwise
 SHARE=$(prefix)/share/house
 
 INSTALL=/usr/bin/install
+
+HAPP=waterwise
 
 # Application build. --------------------------------------------
 
@@ -55,7 +55,7 @@ install-ui: install-preamble
 	$(INSTALL) -m 0644 public/* $(DESTDIR)$(SHARE)/public/waterwise
 
 install-app: install-ui
-	$(INSTALL) -m 0755 -s waterwise $(DESTDIR)$(DESTDIR)$(prefix)/bin
+	$(INSTALL) -m 0755 -s waterwise $(DESTDIR)$(prefix)/bin
 	touch $(DESTDIR)/etc/default/waterwise
 
 uninstall-app:

@@ -17,9 +17,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA  02110-1301, USA.
 
+prefix=/usr/local
+
 HAPP=waterwise
-HROOT=/usr/local
-SHARE=$(HROOT)/share/house
+SHARE=$(prefix)/share/house
+
+INSTALL=/usr/bin/install
 
 # Application build. --------------------------------------------
 
@@ -43,28 +46,22 @@ waterwise: $(OBJS)
 
 # Application files installation --------------------------------
 
-install-app:
-	mkdir -p $(HROOT)/bin
-	mkdir -p /var/lib/house
-	mkdir -p /etc/house
-	rm -f $(HROOT)/bin/waterwise
-	cp waterwise $(HROOT)/bin
-	chown root:root $(HROOT)/bin/waterwise
-	chmod 755 $(HROOT)/bin/waterwise
-	mkdir -p $(SHARE)/public/waterwise
-	cp public/* $(SHARE)/public/waterwise
-	chmod 644 $(SHARE)/public/waterwise/*
-	chmod 755 $(SHARE) $(SHARE)/public $(SHARE)/public/waterwise
-	touch /etc/default/waterwise
+install-ui: install-preamble
+	$(INSTALL) -m 0755 -d $(DESTDIR)$(SHARE)/public/waterwise
+	$(INSTALL) -m 0644 public/* $(DESTDIR)$(SHARE)/public/waterwise
+
+install-app: install-ui
+	$(INSTALL) -m 0755 -s waterwise $(DESTDIR)$(DESTDIR)$(prefix)/bin
+	touch $(DESTDIR)/etc/default/waterwise
 
 uninstall-app:
-	rm -rf $(SHARE)/public/waterwise
-	rm -f $(HROOT)/bin/waterwise
+	rm -rf $(DESTDIR)$(SHARE)/public/waterwise
+	rm -f $(DESTDIR)$(prefix)/bin/waterwise
 
 purge-app:
 
 purge-config:
-	rm -rf /etc/default/waterwise
+	rm -rf $(DESTDIR)/etc/default/waterwise
 
 # System installation. ------------------------------------------
 
@@ -76,13 +73,14 @@ docker: all
 	rm -rf build
 	mkdir -p build
 	cp Dockerfile build
-	mkdir -p build$(HROOT)/bin
-	cp waterwise build$(HROOT)/bin
-	chmod 755 build$(HROOT)/bin/waterwise
-	mkdir -p build$(HROOT)/share/house/public/waterwise
-	cp public/* build$(HROOT)/share/house/public/waterwise
-	chmod 644 build$(HROOT)/share/house/public/waterwise/*
+	mkdir -p build$(prefix)/bin
+	cp waterwise build$(prefix)/bin
+	chmod 755 build$(prefix)/bin/waterwise
+	mkdir -p build$(prefix)/share/house/public/waterwise
+	cp public/* build$(prefix)/share/house/public/waterwise
+	chmod 644 build$(prefix)/share/house/public/waterwise/*
 	cp $(SHARE)/public/house.css build$(SHARE)/public
 	chmod 644 build$(SHARE)/public/house.css
 	cd build ; docker build -t waterwise .
 	rm -rf build
+

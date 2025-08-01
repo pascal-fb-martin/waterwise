@@ -46,7 +46,7 @@ rebuild: clean all
 	gcc -c -Os -o $@ $<
 
 waterwise: $(OBJS)
-	gcc -Os -o waterwise $(OBJS) -lhouseportal -lechttp -lssl -lcrypto -lrt
+	gcc -Os -o waterwise $(OBJS) -lhouseportal -lechttp -lssl -lcrypto -lmagic -lrt
 
 # Application files installation --------------------------------
 

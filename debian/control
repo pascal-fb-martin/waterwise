@@ -1,0 +1,18 @@
+Source: waterwise
+Version: 1.0
+Section: Web servers
+Maintainer: Pascal Martin <pascal.fb.martin@gmail.com>
+Priority: optional
+Homepage: https://github.com/pascal-fb-martin/waterwise
+Standard-Version: 4.7.0
+Package: waterwise
+Architecture: {{arch}}
+Depends: 
+Description: A House service to retrieve a watering index from the MWDSC.
+ Waterwise is part of the House suite of web services.
+ .
+ Waterwise accesses the Metropolitan Water District of Southern California's
+ bewaterwise.com web site to get the current daily, weekly and monthly
+ watering indexes. This index is then available to the HouseSprinkler
+ service to adjust irrigation times.
+

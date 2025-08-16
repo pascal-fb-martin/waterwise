@@ -11,6 +11,7 @@ This project is also a good example of a minimal micro-service based on echttp a
 ## Interface
 
 The waterwise service accepts the /waterwise/status HTTP URL and returns the watering index information in JSON format, for example:
+
 ```
 {
   "host": "andresy",
@@ -26,6 +27,7 @@ The waterwise service accepts the /waterwise/status HTTP URL and returns the wat
   }
 }
 ```
+
 The timestamp field represents the time of the request, the host field represents the name of the server hosting this micro-service.
 
 The origin field represent the URL used to obtain the index. The state field is either 'u' (not yet initialized), 'f' (failed to access the bewaterwise.com web site), 'e' (malformed JSON data received) or 'a' (active). Except when active, an error field provides a description of the error.
@@ -44,6 +46,7 @@ The provided Makefile supports building private Debian packages. These are _not_
   no source package.
 
 To build a Debian package, use the `debian-package` target:
+
 ```
 make debian-package
 ```

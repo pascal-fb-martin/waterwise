@@ -1,4 +1,4 @@
-# waterwise
+# Waterwise
 
 ## Overview
 

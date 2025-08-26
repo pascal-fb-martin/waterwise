@@ -207,15 +207,6 @@ static void waterwise_response
         else WaterWiseUpdate += (24 * 3600); // Calculated the day after.
     }
 
-    if ((olddaily == WaterWiseIndexDaily) &&
-        (oldweekly == WaterWiseIndexWeekly) &&
-        (oldmonthly == WaterWiseIndexMonthly) &&
-        (oldupdate == WaterWiseUpdate)) return; // No change.
-
-    houselog_event ("WATERWISE", "INDEX", "NEW",
-                    "INDEX %d%% (DAILY) %d%% (WEEKLY) %d%% (MONTHLY)",
-                    WaterWiseIndexDaily, WaterWiseIndexWeekly, WaterWiseIndexMonthly);
-
     struct timeval timestamp;
     timestamp.tv_sec = WaterWiseUpdate;
     timestamp.tv_usec = 0;
@@ -227,6 +218,15 @@ static void waterwise_response
     houselog_sensor_numeric
         (&timestamp, "Riverside", "index.monthly", WaterWiseIndexMonthly, "%");
     houselog_sensor_flush ();
+
+    if ((olddaily == WaterWiseIndexDaily) &&
+        (oldweekly == WaterWiseIndexWeekly) &&
+        (oldmonthly == WaterWiseIndexMonthly) &&
+        (oldupdate == WaterWiseUpdate)) return; // No change.
+
+    houselog_event ("WATERWISE", "INDEX", "CHANGED",
+                    "INDEX %d%% (DAILY) %d%% (WEEKLY) %d%% (MONTHLY)",
+                    WaterWiseIndexDaily, WaterWiseIndexWeekly, WaterWiseIndexMonthly);
 }
 
 static void waterwise_background (int fd, int mode) {

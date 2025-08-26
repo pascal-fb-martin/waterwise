@@ -203,8 +203,7 @@ static void waterwise_response
         update.tm_hour = update.tm_min = update.tm_sec = 0;
         update.tm_isdst = -1;
         WaterWiseUpdate = mktime (&update);
-        if (WaterWiseUpdate < 0) WaterWiseUpdate = 0;
-        else WaterWiseUpdate += (24 * 3600); // Calculated the day after.
+        if (WaterWiseUpdate <= 0) WaterWiseUpdate = WaterWiseReceived;
     }
 
     struct timeval timestamp;

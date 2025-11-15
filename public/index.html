@@ -8,8 +8,6 @@ function indexUpdate (response) {
     document.getElementsByTagName('title')[0].innerHTML =
         response.host+' - Waterwise';
 
-    document.getElementById('portal').href = 'http://'+response.proxy+'/index.html';
-
     document.getElementById('indextype').innerHTML =
         response.waterindex.status.type;
 
@@ -52,16 +50,14 @@ window.onload = function() {
 <title></title>
 </head>
 <body>
-   <table class="housetopcontainer">
-   <tr><td>
-   <table class="housetop">
+   <header>
+   <table>
    <tr>
-   <td><a id="portal" href="/index.html">Portal</a></td>
    <td><span>Waterwise</span></td>
    </tr>
    </table> 
-   </td></tr>
-   </table> 
+   </header> 
+   <section>
    <table class="housepanel">
    <tr><td>
    <div class="housepane">
@@ -84,6 +80,7 @@ window.onload = function() {
    <tr><td><button class="housepanelbutton" onclick="selectWeekly()">Use Weekly Index</button></td></tr>
    <tr><td><button class="housepanelbutton" onclick="selectMonthly()">Use Monthly Index</button></td></tr>
    </table>
+   </section>
 </body>
 </html>
 

@@ -161,6 +161,7 @@ static void waterwise_response
     int oldweekly = WaterWiseIndexWeekly;
     int oldmonthly = WaterWiseIndexMonthly;
     time_t oldupdate = WaterWiseUpdate;
+    time_t oldreceived = WaterWiseReceived;
 
     int index = echttp_json_search (tokens, WaterWiseDailyIndexPath);
     if (index <= 0) {
@@ -205,24 +206,38 @@ static void waterwise_response
         if (WaterWiseUpdate <= 0) WaterWiseUpdate = WaterWiseReceived;
     }
 
-    struct timeval timestamp;
-    timestamp.tv_sec = WaterWiseUpdate;
-    timestamp.tv_usec = 0;
+    // Record new sensor data only once a day.
+    // (This may record multiple times is the service was restarted..)
+    //
+    struct tm newday = {0};
+    localtime_r (&WaterWiseReceived, &newday);
+    struct tm oldday = {0};
+    localtime_r (&oldreceived, &oldday);
 
-    houselog_sensor_numeric
-        (&timestamp, "Riverside", "index.daily", WaterWiseIndexDaily, "%");
-    houselog_sensor_numeric
-        (&timestamp, "Riverside", "index.weekly", WaterWiseIndexWeekly, "%");
-    houselog_sensor_numeric
-        (&timestamp, "Riverside", "index.monthly", WaterWiseIndexMonthly, "%");
-    houselog_sensor_flush ();
+    if ((newday.tm_yday != oldday.tm_yday) ||
+        (newday.tm_year != oldday.tm_year)) {
+        struct timeval timestamp;
+        timestamp.tv_sec = WaterWiseReceived;
+        timestamp.tv_usec = 0;
+        const char *place = "Riverside";
 
+        houselog_sensor_numeric
+            (&timestamp, place, "index.daily", WaterWiseIndexDaily, "%");
+        houselog_sensor_numeric
+            (&timestamp, place, "index.weekly", WaterWiseIndexWeekly, "%");
+        houselog_sensor_numeric
+            (&timestamp, place, "index.monthly", WaterWiseIndexMonthly, "%");
+        houselog_sensor_flush ();
+    }
+
+    // Record the index as an event only if new values were recalculated.
+    //
     if ((olddaily == WaterWiseIndexDaily) &&
         (oldweekly == WaterWiseIndexWeekly) &&
         (oldmonthly == WaterWiseIndexMonthly) &&
         (oldupdate == WaterWiseUpdate)) return; // No change.
 
-    houselog_event ("WATERWISE", "INDEX", "CHANGED",
+    houselog_event ("WATERWISE", "INDEX", "NEW",
                     "INDEX %d%% (DAILY) %d%% (WEEKLY) %d%% (MONTHLY)",
                     WaterWiseIndexDaily, WaterWiseIndexWeekly, WaterWiseIndexMonthly);
 }

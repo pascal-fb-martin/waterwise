@@ -64,6 +64,7 @@ install-app: install-ui install-runtime
 uninstall-app:
 	rm -rf $(DESTDIR)$(SHARE)/public/waterwise
 	rm -f $(DESTDIR)$(prefix)/bin/waterwise
+	rmdir --ignore-fail-on-non-empty $(DESTDIR)$(prefix)/bin
 
 purge-app:
 

@@ -237,7 +237,7 @@ static void waterwise_response
         (oldmonthly == WaterWiseIndexMonthly) &&
         (oldupdate == WaterWiseUpdate)) return; // No change.
 
-    houselog_event ("WATERWISE", "INDEX", "NEW",
+    houselog_event ("INDEX", "WATERWISE", "NEW",
                     "INDEX %d%% (DAILY) %d%% (WEEKLY) %d%% (MONTHLY)",
                     WaterWiseIndexDaily, WaterWiseIndexWeekly, WaterWiseIndexMonthly);
 }

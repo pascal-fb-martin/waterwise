@@ -3,6 +3,11 @@
 <head>
 <link rel=stylesheet type="text/css" href="/house.css" title="House">
 <script>
+function showTime (value, id) {
+    document.getElementById(id).innerHTML =
+        new Date(value * 1000).toLocaleString();
+}
+
 function indexUpdate (response) {
 
     document.getElementsByTagName('title')[0].innerHTML =
@@ -12,14 +17,13 @@ function indexUpdate (response) {
         response.waterindex.status.type;
 
     if (response.waterindex.status.received) {
-        var now = Date(response.waterindex.status.received * 1000).toLocaleString();
-        now = now.substr(0, now.indexOf(" GMT"));
+        showTime (response.waterindex.status.received, 'received');
+        showTime (response.waterindex.status.updated, 'indexdate');
 
         document.getElementById('indexvalue').innerHTML =
             response.waterindex.status.index+'%';
         document.getElementById('priority').innerHTML =
             response.waterindex.status.priority;
-        document.getElementById('indexdate').innerHTML = now;
     } else {
         document.getElementById('indexvalue').innerHTML =
             response.waterindex.status.error;
@@ -70,8 +74,10 @@ window.onload = function() {
    <td><span class="housedata" id="indexvalue"></span></td></tr>
    <tr><td>Priority:</td>
    <td><span class="housedata" id="priority"></span></td></tr>
-   <tr><td>Date:</td>
+   <tr><td>Index Date:</td>
    <td><span class="housedata" id="indexdate"></span></td></tr>
+   <tr><td>Received:</td>
+   <td><span class="housedata" id="received"></span></td></tr>
    </table>
    </div>
    </td></tr>

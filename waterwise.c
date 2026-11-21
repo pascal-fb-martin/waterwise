@@ -136,13 +136,13 @@ static void waterwise_response
     }
 
     WaterWiseState[0] = 'e'; // Assume error.
-    if (status != 200) {
+    if (!ECHTTP_SUCCESS(status)) {
         snprintf (WaterWiseError, sizeof(WaterWiseError),
-                  "HTTP code %d on %s", status, WaterWiseUrl);
-        houselog_trace (HOUSE_FAILURE, "HTTP",
-                        "ERROR %d on %s", status, WaterWiseUrl);
+                  "HTTP %d %s ON %s", status, echttp_reason(), WaterWiseUrl);
+        houselog_trace (HOUSE_FAILURE, "scan", "%s", WaterWiseError);
         return;
     }
+    if (!data || !length) return; // No data to parse
 
     const char *error = echttp_xml_parse (data, tokens, &count);
     if (error) {

@@ -1,5 +1,8 @@
 # Waterwise
 
+> [!NOTE]
+> The bewaterwise.com RSS feed seems to have been discontinued. This project is now obsolete.
+> 
 ## Overview
 
 A micro service to interface with the bewaterwise.com watering index RSS feed
